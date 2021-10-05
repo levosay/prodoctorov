@@ -1,0 +1,18 @@
+.list {
+  list-style-type: none;
+}
+
+.list__photo {
+  width: 100px;
+  height: 100px;
+}
+
+.list__album {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.img-wrapper {
+
+}
