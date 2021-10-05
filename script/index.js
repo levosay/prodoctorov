@@ -1,4 +1,7 @@
 const app = document.querySelector('#app')
+const swap = document.querySelector('#swap')
+const catalog = document.querySelector('#catalog')
+const inductee = document.querySelector('#inductee')
 const linkUsers = 'https://json.medrating.org/users/'
 const linkAlbum = 'https://json.medrating.org/albums?userId='
 const linkPhoto = 'https://json.medrating.org/photos?albumId='
@@ -17,6 +20,22 @@ app.addEventListener('click', event => {
   if (elemClass === 'list__album' && !elemPhoto) getData(linkPhoto, id, element)
 //Удаление
   clearElem(element)
+})
+
+// Обработчик для переключения: Каталог/Избранное
+swap.addEventListener('click', e => {
+  console.log(e.target.getAttribute('id'))
+  console.log(e)
+  let idBtn = e.target.getAttribute('id')
+  if (idBtn === 'catalog' && !catalog.classList.add('active')) {
+    catalog.classList.add('active')
+    inductee.classList.remove('active')
+  }
+
+  if (idBtn === 'inductee' && !inductee.classList.add('active')) {
+    inductee.classList.add('active')
+    catalog.classList.remove('active')
+  }
 })
 
 //Создание списка пользователей
@@ -75,6 +94,8 @@ const clearElem = (element) => {
   let userAlbums = element.querySelectorAll('.list')
   userAlbums.forEach(elem => elem.remove())
 }
+
+
 
 
 

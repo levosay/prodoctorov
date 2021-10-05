@@ -13,6 +13,6 @@
   flex-wrap: wrap;
 }
 
-.img-wrapper {
-
+.active {
+  background-color: blue;
 }
