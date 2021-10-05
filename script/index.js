@@ -11,14 +11,13 @@ app.addEventListener('click', event => {
   let elemClass = element.className
   let userId = element.getAttribute('data-id')
 
-
   if (elemClass === 'list__user' && !elemAlbum)
     getData
     (userId, element, 'album', 'https://json.medrating.org/albums?userId=')
 
   if (elemClass === 'list__album' && !elemPhoto)
     getData
-    (userId, element, 'photo', 'https://json.medrating.org/albums?userId=')
+    (userId, element, 'photo', 'https://json.medrating.org/photos?albumId=')
 
   clearAlbums(element)
 })
@@ -27,10 +26,9 @@ fetch('https://json.medrating.org/users/')
   .then((response) => response.json())
   .then((data) => data.forEach( element => {
     let userList = document.createElement('ul')
+    let user = document.createElement('li')
     userList.classList.add('container', 'list')
     app.append(userList)
-
-    let user = document.createElement('li')
     user.setAttribute('data-id', element.id)
     user.classList.add('list__user')
     user.innerHTML = element.name
@@ -38,14 +36,19 @@ fetch('https://json.medrating.org/users/')
   }))
 
 const createElem = (inPoint, element, name) => {
+  console.log(element)
   let ul = document.createElement('ul')
+  let li = document.createElement('li')
   ul.classList.add('list')
   inPoint.append(ul)
-  let li = document.createElement('li')
   ul.append(li)
   li.setAttribute('data-id', element.id)
   li.classList.add(`list__${name}`)
-  li.innerHTML = element.title
+  element.url
+    ?
+    li.innerHTML = `<img src=${element.url} alt=${element.title} class="list__photo">`
+    :
+    li.innerHTML = element.title
   ul.append(li)
 }
 
