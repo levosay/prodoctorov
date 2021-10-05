@@ -6,15 +6,22 @@ const app = document.querySelector('#app')
 
 app.addEventListener('click', event => {
   let element = event.target
-  let album = element.querySelector('.list__album')
-  if (!album) {
-    let userId = element.getAttribute('data-id')
+  let elemAlbum = element.querySelector('.list__album')
+  let elemPhoto = element.querySelector('.list__photo')
+  let elemClass = element.className
+  let userId = element.getAttribute('data-id')
 
-    getAlbums(userId, element)
-  }
+
+  if (elemClass === 'list__user' && !elemAlbum)
+    getData
+    (userId, element, 'album', 'https://json.medrating.org/albums?userId=')
+
+  if (elemClass === 'list__album' && !elemPhoto)
+    getData
+    (userId, element, 'photo', 'https://json.medrating.org/albums?userId=')
+
   clearAlbums(element)
 })
-
 
 fetch('https://json.medrating.org/users/')
   .then((response) => response.json())
@@ -30,25 +37,27 @@ fetch('https://json.medrating.org/users/')
     userList.append(user)
   }))
 
+const createElem = (inPoint, element, name) => {
+  let ul = document.createElement('ul')
+  ul.classList.add('list')
+  inPoint.append(ul)
+  let li = document.createElement('li')
+  ul.append(li)
+  li.setAttribute('data-id', element.id)
+  li.classList.add(`list__${name}`)
+  li.innerHTML = element.title
+  ul.append(li)
+}
+
 const clearAlbums = (element) => {
-  let userAlbums = element.querySelectorAll('.list__album')
+  let userAlbums = element.querySelectorAll('.list')
   userAlbums.forEach(elem => elem.remove())
 }
 
-const getAlbums = (id, inPoint) => {
-  fetch(`https://json.medrating.org/albums?userId=${id}`)
+const getData = (id, inPoint, name, url) => {
+  fetch(`${url}${id}`)
     .then((response) => response.json())
-    .then((data) => data.forEach( element => {
-      let albumsList = document.createElement('ul')
-      albumsList.classList.add('list')
-      inPoint.append(albumsList)
-      let albums = document.createElement('li')
-      albumsList.append(albums)
-      //albums.setAttribute('data-id', element.id)
-      albums.classList.add('list__album')
-      albums.innerHTML = element.title
-      albumsList.append(albums)
-    }))
+    .then((data) => data.forEach( element => createElem(inPoint, element, name)))
 }
 
 
