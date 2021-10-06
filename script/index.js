@@ -2,6 +2,7 @@ const app = document.querySelector('#app')
 const swap = document.querySelector('#swap')
 const catalog = document.querySelector('#catalog')
 const inductee = document.querySelector('#inductee')
+const photo = document.querySelector('.list__photo')
 const linkUsers = 'https://json.medrating.org/users/'
 const linkAlbum = 'https://json.medrating.org/albums?userId='
 const linkPhoto = 'https://json.medrating.org/photos?albumId='
@@ -14,30 +15,70 @@ app.addEventListener('click', event => {
   let elemClass = element.className
   let id = element.getAttribute('data-id')
 
+
 //Запрос для альбомов
   if (elemClass === 'list__user' && !elemAlbum) getData(linkAlbum, id, element)
 //Запрос для фото
   if (elemClass === 'list__album' && !elemPhoto) getData(linkPhoto, id, element)
+
+// Запись и уделание избранного в localstorage
+  if (elemClass === 'photo') {
+    let url = element.getAttribute('src')
+    let title = element.getAttribute('alt')
+    let arg = [url, title]
+
+    !localStorage.getItem(`photo_${id}`)
+      ?
+      localStorage.setItem(`photo_${id}`, `${arg}`)
+      :
+      localStorage.removeItem(`photo_${id}`)
+  }
+
 //Удаление
   clearElem(element)
 })
-
 // Обработчик для переключения: Каталог/Избранное
 swap.addEventListener('click', e => {
-  console.log(e.target.getAttribute('id'))
-  console.log(e)
+  //console.log(e.target.getAttribute('id'))
+  //console.log(e)
   let idBtn = e.target.getAttribute('id')
   if (idBtn === 'catalog' && !catalog.classList.add('active')) {
     catalog.classList.add('active')
     inductee.classList.remove('active')
+    app.innerHTML = ''
+    app.append(ul)
+
   }
+
 
   if (idBtn === 'inductee' && !inductee.classList.add('active')) {
     inductee.classList.add('active')
     catalog.classList.remove('active')
+
+      // let img = document.createElement('img')
+      // img.classList.add('photo')
+      // img.src = url
+      // img.alt = title
+      // img.setAttribute('data-id', id)
+      // app.innerHTML = ''
+      // app.append(img)
+
   }
 })
 
+// const allStorage = () => {
+//
+//   let values = [],
+//     keys = Object.keys(localStorage),
+//     i = keys.length;
+//   //console.log(keys)
+//   while ( i-- ) {
+//     values.push( localStorage.getItem(keys[i]) );
+//   }
+//
+//   return values;
+// }
+console.log(allStorage())
 //Создание списка пользователей
 let ul = document.createElement('ul')
 ul.classList.add('container', 'list')
@@ -73,8 +114,9 @@ const createElem = (data, inPoint) => {
       let img = document.createElement('img')
       img.classList.add('photo')
       img.src = element.url
-      img.alt=element.title
-      img.class='photo'
+      img.alt = element.title
+      img.setAttribute('data-id', element.id)
+      img.class = 'photo'
       li.classList.add('list__photo')
       li.append(img)
       ul.append(li)
