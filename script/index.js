@@ -2,7 +2,7 @@ const app = document.querySelector('#app')
 const swap = document.querySelector('#swap')
 const catalog = document.querySelector('#catalog')
 const inductee = document.querySelector('#inductee')
-const photo = document.querySelector('.list__photo')
+const photo = document.querySelector('.photo-wrapper')
 const linkUsers = 'https://json.medrating.org/users/'
 const linkAlbum = 'https://json.medrating.org/albums?userId='
 const linkPhoto = 'https://json.medrating.org/photos?albumId='
@@ -11,7 +11,7 @@ const linkPhoto = 'https://json.medrating.org/photos?albumId='
 app.addEventListener('click', event => {
   let element = event.target
   let elemAlbum = element.querySelector('.list__album')
-  let elemPhoto = element.querySelector('.list__photo')
+  let elemPhoto = element.querySelector('.photo-wrapper')
   let elemClass = element.className
   let id = element.getAttribute('data-id')
 
@@ -21,19 +21,26 @@ app.addEventListener('click', event => {
   if (elemClass === 'list__album' && !elemPhoto) getData(linkPhoto, id, element)
 
 // Запись и уделание избранного в localstorage
-  if (elemClass === 'photo') {
-    let url = element.getAttribute('src')
-    let title = element.getAttribute('alt')
+//   if (elemClass === 'photo') {
+//
+//   }
+  if (elemClass === 'star-favorite') {
+    let parentElement = event.target.parentElement
+    let photo = parentElement.querySelector('.photo')
+    let id = photo.getAttribute('data-id')
+    let url = photo.getAttribute('src')
+    let title = photo.getAttribute('alt')
     let arg = [url, title]
-    console.log(arg)
-    //localStorage.setItem("data", JSON.stringify(arg1))
-    !localStorage.getItem(`photo_${id}`)
-      ?
-      localStorage.setItem(`photo_${id}`, JSON.stringify(arg))
-      :
-      localStorage.removeItem(`photo_${id}`)
-  }
 
+    if (!localStorage.getItem(`photo_${id}`)){
+      localStorage.setItem(`photo_${id}`, JSON.stringify(arg))
+      event.target.setAttribute('src', './img/star_active.png')
+    } else {
+      localStorage.removeItem(`photo_${id}`)
+      event.target.setAttribute('src', './img/star_empty.png')
+    }
+
+  }
 //Удаление
   clearElem(element)
 })
@@ -42,20 +49,24 @@ app.addEventListener('click', event => {
 swap.addEventListener('click', e => {
   let idBtn = e.target.getAttribute('id')
 
-  if (idBtn === 'catalog' && !catalog.classList.add('active')) {
-    catalog.classList.add('active')
-    inductee.classList.remove('active')
+  if (idBtn === 'catalog' && !catalog.classList.add('btn-active')) {
+    catalog.classList.add('btn-active')
+    inductee.classList.remove('btn-active')
     app.innerHTML = ''
     app.append(ul)
   }
 
-  if (idBtn === 'inductee' && !inductee.classList.add('active')) {
-    inductee.classList.add('active')
-    catalog.classList.remove('active')
+  if (idBtn === 'inductee' && !inductee.classList.add('btn-active')) {
+    inductee.classList.add('btn-active')
+    catalog.classList.remove('btn-active')
 
-    createInductee()
+    showInductee()
   }
 })
+
+const changeInducteeIcon = (elem) => {
+  elem.setAttribute('src', 'star_active.png')
+}
 
 // Получение всех данных из localStorage
 const getAllStorage = () => {
@@ -68,9 +79,8 @@ const getAllStorage = () => {
   return values;
 }
 
-
 // Создание спика Избранного
-const createInductee = () => {
+const showInductee = () => {
   let allStorage = getAllStorage()
   let div = document.createElement('div')
   app.innerHTML = ''
@@ -115,16 +125,27 @@ const createElem = (data, inPoint) => {
 
   data.forEach(element => {
     let li = document.createElement('li')
+    let starImg = document.createElement('img')
+    starImg.classList.add('star-favorite')
+    starImg.alt = 'star'
 
     // Если событие на list__album
-    if (element.url) {
+    if (element.thumbnailUrl) {
+      starImg.src = localStorage.getItem(`photo_${element.id}`)
+        ?
+        './img/star_active.png'
+        :
+        './img/star_empty.png'
+      ul.classList.remove('list')
+      ul.classList.add('list-photo-wrapp')
       let img = document.createElement('img')
       img.classList.add('photo')
-      img.src = element.url
+      img.src = element.thumbnailUrl
       img.alt = element.title
       img.setAttribute('data-id', element.id)
-      li.classList.add('list__photo')
+      li.classList.add('photo-wrapper')
       li.append(img)
+      li.append(starImg)
       ul.append(li)
       inPoint.append(ul)
     } else { // Если событие на list__user
@@ -139,8 +160,11 @@ const createElem = (data, inPoint) => {
 
 // Удаление елементов
 const clearElem = (element) => {
-  let userAlbums = element.querySelectorAll('.list')
-  userAlbums.forEach(elem => elem.remove())
+  if (element.querySelector('.list-photo-wrapp')) {
+    element.querySelector('.list-photo-wrapp').remove()
+  }
+  element.querySelectorAll('.list')
+    .forEach(elem => elem.remove())
 }
 
 

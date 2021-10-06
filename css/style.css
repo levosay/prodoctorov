@@ -1,11 +1,69 @@
+.container {
+  margin: auto;
+  padding: 0;
+  max-width: 744px;
+  font-family: 'Roboto', sans-serif;
+}
+.swap {
+  display: flex;
+  justify-content: space-between;
+}
+.btn {
+  width: 50%;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  line-height: 130%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 32px;
+  border: none;
+  background: inherit;
+}
+.btn-active {
+  color: #117DC1;
+  background: #EDF9FF;
+  border-radius: 16px;
+}
+.list__user {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 130%;
+}
+.list__album {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  line-height: 130%;
+}
 .list {
   list-style-type: none;
 }
+.list-photo-wrapp {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-column-gap: 42px;
+  grid-row-gap: 42px;
 
-.list__photo {
-  width: 100px;
-  height: 100px;
 }
+.photo-wrapper {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  display: flex;
+}
+.photo {
+  width: 100%;
+}
+.star-favorite {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
 
 .list__album {
   display: flex;
@@ -13,6 +71,3 @@
   flex-wrap: wrap;
 }
 
-.active {
-  background-color: blue;
-}
