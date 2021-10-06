@@ -15,7 +15,6 @@ app.addEventListener('click', event => {
   let elemClass = element.className
   let id = element.getAttribute('data-id')
 
-
 //Запрос для альбомов
   if (elemClass === 'list__user' && !elemAlbum) getData(linkAlbum, id, element)
 //Запрос для фото
@@ -26,10 +25,11 @@ app.addEventListener('click', event => {
     let url = element.getAttribute('src')
     let title = element.getAttribute('alt')
     let arg = [url, title]
-
+    console.log(arg)
+    //localStorage.setItem("data", JSON.stringify(arg1))
     !localStorage.getItem(`photo_${id}`)
       ?
-      localStorage.setItem(`photo_${id}`, `${arg}`)
+      localStorage.setItem(`photo_${id}`, JSON.stringify(arg))
       :
       localStorage.removeItem(`photo_${id}`)
   }
@@ -37,48 +37,55 @@ app.addEventListener('click', event => {
 //Удаление
   clearElem(element)
 })
+
 // Обработчик для переключения: Каталог/Избранное
 swap.addEventListener('click', e => {
-  //console.log(e.target.getAttribute('id'))
-  //console.log(e)
   let idBtn = e.target.getAttribute('id')
+
   if (idBtn === 'catalog' && !catalog.classList.add('active')) {
     catalog.classList.add('active')
     inductee.classList.remove('active')
     app.innerHTML = ''
     app.append(ul)
-
   }
-
 
   if (idBtn === 'inductee' && !inductee.classList.add('active')) {
     inductee.classList.add('active')
     catalog.classList.remove('active')
 
-      // let img = document.createElement('img')
-      // img.classList.add('photo')
-      // img.src = url
-      // img.alt = title
-      // img.setAttribute('data-id', id)
-      // app.innerHTML = ''
-      // app.append(img)
-
+    createInductee()
   }
 })
 
-// const allStorage = () => {
-//
-//   let values = [],
-//     keys = Object.keys(localStorage),
-//     i = keys.length;
-//   //console.log(keys)
-//   while ( i-- ) {
-//     values.push( localStorage.getItem(keys[i]) );
-//   }
-//
-//   return values;
-// }
-console.log(allStorage())
+// Получение всех данных из localStorage
+const getAllStorage = () => {
+  let values = [],
+      keys = Object.keys(localStorage),
+      i = keys.length;
+  while ( i-- ) {
+    values.push( JSON.parse(localStorage.getItem(keys[i])) );
+  }
+  return values;
+}
+
+
+// Создание спика Избранного
+const createInductee = () => {
+  let allStorage = getAllStorage()
+  let div = document.createElement('div')
+  app.innerHTML = ''
+
+  allStorage.forEach(arr => {
+    let img = document.createElement('img')
+    img.classList.add('photo')
+    img.src = arr[0]
+    img.alt = arr[1]
+    div.classList.add('inductee__photo')
+    div.append(img)
+    app.append(div)
+  })
+}
+
 //Создание списка пользователей
 let ul = document.createElement('ul')
 ul.classList.add('container', 'list')
@@ -116,7 +123,6 @@ const createElem = (data, inPoint) => {
       img.src = element.url
       img.alt = element.title
       img.setAttribute('data-id', element.id)
-      img.class = 'photo'
       li.classList.add('list__photo')
       li.append(img)
       ul.append(li)
