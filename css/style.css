@@ -71,3 +71,13 @@
   flex-wrap: wrap;
 }
 
+
+.inductee {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-column-gap: 42px;
+  grid-row-gap: 42px;
+}
+.inductee-wrapp {
+  position: relative;
+}

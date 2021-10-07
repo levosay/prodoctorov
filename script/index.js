@@ -30,7 +30,7 @@ app.addEventListener('click', event => {
     let id = photo.getAttribute('data-id')
     let url = photo.getAttribute('src')
     let title = photo.getAttribute('alt')
-    let arg = [url, title]
+    let arg = [url, title, id]
 
     if (!localStorage.getItem(`photo_${id}`)){
       localStorage.setItem(`photo_${id}`, JSON.stringify(arg))
@@ -38,8 +38,10 @@ app.addEventListener('click', event => {
     } else {
       localStorage.removeItem(`photo_${id}`)
       event.target.setAttribute('src', './img/star_empty.png')
+      if (event.target.parentElement.className === 'inductee-wrapp') {
+        event.target.parentElement.remove()
+      }
     }
-
   }
 //Удаление
   clearElem(element)
@@ -53,7 +55,7 @@ swap.addEventListener('click', e => {
     catalog.classList.add('btn-active')
     inductee.classList.remove('btn-active')
     app.innerHTML = ''
-    app.append(ul)
+    createUserList()
   }
 
   if (idBtn === 'inductee' && !inductee.classList.add('btn-active')) {
@@ -63,10 +65,6 @@ swap.addEventListener('click', e => {
     showInductee()
   }
 })
-
-const changeInducteeIcon = (elem) => {
-  elem.setAttribute('src', 'star_active.png')
-}
 
 // Получение всех данных из localStorage
 const getAllStorage = () => {
@@ -82,34 +80,47 @@ const getAllStorage = () => {
 // Создание спика Избранного
 const showInductee = () => {
   let allStorage = getAllStorage()
-  let div = document.createElement('div')
+  let container = document.createElement('div')
+
   app.innerHTML = ''
 
   allStorage.forEach(arr => {
+    let divWrapp = document.createElement('div')
     let img = document.createElement('img')
+    let starImg = document.createElement('img')
+
+    container.classList.add('inductee')
+    divWrapp.classList.add('inductee-wrapp')
     img.classList.add('photo')
     img.src = arr[0]
     img.alt = arr[1]
-    div.classList.add('inductee__photo')
-    div.append(img)
-    app.append(div)
+    img.setAttribute('data-id', `${arr[2]}`)
+    starImg.classList.add('star-favorite')
+    starImg.alt = 'star'
+    starImg.src = './img/star_active.png'
+    divWrapp.append(starImg)
+    divWrapp.append(img)
+    container.append(divWrapp)
+    app.append(container)
   })
 }
 
 //Создание списка пользователей
-let ul = document.createElement('ul')
-ul.classList.add('container', 'list')
-fetch(linkUsers)
-  .then((response) => response.json())
-  .then((data) => data.forEach( element => {
-    let user = document.createElement('li')
-    user.setAttribute('data-id', element.id)
-    user.classList.add('list__user')
-    user.innerHTML = element.name
-    ul.append(user)
-  }))
-app.append(ul)
-
+const createUserList = () => {
+  let ul = document.createElement('ul')
+  ul.classList.add('container', 'list')
+  fetch(linkUsers)
+    .then((response) => response.json())
+    .then((data) => data.forEach( element => {
+      let user = document.createElement('li')
+      user.setAttribute('data-id', element.id)
+      user.classList.add('list__user')
+      user.innerHTML = element.name
+      ul.append(user)
+    }))
+  app.append(ul)
+}
+createUserList()
 
 // Получение данных по ссылке и отправка их на создание разметки
 const getData = (url, id, inPoint) => {
@@ -131,11 +142,13 @@ const createElem = (data, inPoint) => {
 
     // Если событие на list__album
     if (element.thumbnailUrl) {
+
       starImg.src = localStorage.getItem(`photo_${element.id}`)
         ?
         './img/star_active.png'
         :
         './img/star_empty.png'
+
       ul.classList.remove('list')
       ul.classList.add('list-photo-wrapp')
       let img = document.createElement('img')
