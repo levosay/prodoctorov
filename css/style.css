@@ -7,6 +7,7 @@
 .swap {
   display: flex;
   justify-content: space-between;
+  margin-bottom: 56px;
 }
 .btn {
   width: 50%;
@@ -27,51 +28,81 @@
   background: #EDF9FF;
   border-radius: 16px;
 }
+.list {
+  list-style-type: none;
+}
 .list__user {
+  position: relative;
   font-style: normal;
   font-weight: 500;
   font-size: 22px;
   line-height: 130%;
 }
 .list__album {
+  position: relative;
   font-style: normal;
   font-weight: normal;
   font-size: 18px;
   line-height: 130%;
-}
-.list {
-  list-style-type: none;
 }
 .list-photo-wrapp {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-column-gap: 42px;
   grid-row-gap: 42px;
-
+  width: max-content;
 }
 .photo-wrapper {
   position: relative;
   width: 150px;
   height: 150px;
-  display: flex;
+  display: block;
 }
 .photo {
   width: 100%;
+  border-radius: 4px;
+}
+.photo:hover {
+  cursor: pointer;
+}
+.photo-fullscreen {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  transition: opacity 0.2s;
+}
+.close-modal {
+  position: fixed;
+  right: 60px;
+  top: 60px;
+  width: 24px;
+  height: 24px;
+  z-index: 3;
+}
+.close-modal:hover {
+  cursor: pointer;
+}
+.overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #F4F4F4;
+  overflow: hidden;
+  z-index: 1;
+  transition: opacity 0.2s;
 }
 .star-favorite {
   position: absolute;
   top: 8px;
   right: 8px;
 }
-
-
-.list__album {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+.star-favorite:hover {
+  cursor: pointer;
 }
-
-
 .inductee {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -80,4 +111,18 @@
 }
 .inductee-wrapp {
   position: relative;
+}
+.description {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 150%;
+  color: #787878;
+}
+.icon-list {
+  position: absolute;
+  top: 5px;
+  left: -29px;
+  width: 20px;
+  height: 20px;
 }

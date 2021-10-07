@@ -1,5 +1,7 @@
 const app = document.querySelector('#app')
+const container = document.querySelector('#container')
 const swap = document.querySelector('#swap')
+const modal = document.querySelector('#modal')
 const catalog = document.querySelector('#catalog')
 const inductee = document.querySelector('#inductee')
 const photo = document.querySelector('.photo-wrapper')
@@ -10,27 +12,27 @@ const linkPhoto = 'https://json.medrating.org/photos?albumId='
 // Обработчик на создание/удаление списков
 app.addEventListener('click', event => {
   let element = event.target
-  let elemAlbum = element.querySelector('.list__album')
+  let parentElement = event.target.parentElement
+  let elemAlbum = element.querySelector('.list__album-span')
   let elemPhoto = element.querySelector('.photo-wrapper')
   let elemClass = element.className
   let id = element.getAttribute('data-id')
 
-//Запрос для альбомов
-  if (elemClass === 'list__user' && !elemAlbum) getData(linkAlbum, id, element)
-//Запрос для фото
-  if (elemClass === 'list__album' && !elemPhoto) getData(linkPhoto, id, element)
 
-// Запись и уделание избранного в localstorage
-//   if (elemClass === 'photo') {
-//
-//   }
+  // Запрос для альбомов
+  if (elemClass === 'list__user-span' && !elemAlbum) getData(linkAlbum, id, element)
+  // Запрос для фото
+  if (elemClass === 'list__album-span' && !elemPhoto) getData(linkPhoto, id, element)
+  // Открытие фото в полный экран
+  if (elemClass === 'photo') photoFullScreen(element)
+  // Запись и уделание избранного в localstorage
   if (elemClass === 'star-favorite') {
-    let parentElement = event.target.parentElement
     let photo = parentElement.querySelector('.photo')
     let id = photo.getAttribute('data-id')
     let url = photo.getAttribute('src')
     let title = photo.getAttribute('alt')
-    let arg = [url, title, id]
+    let urlTU = photo.getAttribute('data-url')
+    let arg = [url, title, id, urlTU]
 
     if (!localStorage.getItem(`photo_${id}`)){
       localStorage.setItem(`photo_${id}`, JSON.stringify(arg))
@@ -43,13 +45,28 @@ app.addEventListener('click', event => {
       }
     }
   }
-//Удаление
+  // // Изменение иконки спика при открытие/закрытие
+  // if (!element.querySelector('.list')) element.style.listStyleImage = 'url("../img/close-list.svg"'
+  // if (element.querySelector('.list')) element.style.listStyleImage = 'url("../img/open-list.svg"'
+  // if (element.querySelector('.list-photo-wrapp')) element.style.listStyleImage = 'url("../img/open-list.svg"'
+
+  // Удаление
   clearElem(element)
 })
 
+// Обработчик закрытия модального окна
+modal.addEventListener('click', event => {
+  let elementClassName = event.target.className
+  if (elementClassName === 'close-modal' || elementClassName === 'overlay') {
+    event.target.parentElement.remove()
+    document.body.style.removeProperty('overflow')
+    document.body.style.removeProperty('position')
+    document.body.style.removeProperty('height')
+  }
+})
 // Обработчик для переключения: Каталог/Избранное
-swap.addEventListener('click', e => {
-  let idBtn = e.target.getAttribute('id')
+swap.addEventListener('click', event => {
+  let idBtn = event.target.getAttribute('id')
 
   if (idBtn === 'catalog' && !catalog.classList.add('btn-active')) {
     catalog.classList.add('btn-active')
@@ -77,34 +94,6 @@ const getAllStorage = () => {
   return values;
 }
 
-// Создание спика Избранного
-const showInductee = () => {
-  let allStorage = getAllStorage()
-  let container = document.createElement('div')
-
-  app.innerHTML = ''
-
-  allStorage.forEach(arr => {
-    let divWrapp = document.createElement('div')
-    let img = document.createElement('img')
-    let starImg = document.createElement('img')
-
-    container.classList.add('inductee')
-    divWrapp.classList.add('inductee-wrapp')
-    img.classList.add('photo')
-    img.src = arr[0]
-    img.alt = arr[1]
-    img.setAttribute('data-id', `${arr[2]}`)
-    starImg.classList.add('star-favorite')
-    starImg.alt = 'star'
-    starImg.src = './img/star_active.png'
-    divWrapp.append(starImg)
-    divWrapp.append(img)
-    container.append(divWrapp)
-    app.append(container)
-  })
-}
-
 //Создание списка пользователей
 const createUserList = () => {
   let ul = document.createElement('ul')
@@ -112,10 +101,20 @@ const createUserList = () => {
   fetch(linkUsers)
     .then((response) => response.json())
     .then((data) => data.forEach( element => {
+      let iconList = document.createElement('img')
+      let span = document.createElement('span')
       let user = document.createElement('li')
+
+
+      iconList.classList.add('icon-list')
+      iconList.src = './img/open-list.svg'
       user.setAttribute('data-id', element.id)
       user.classList.add('list__user')
-      user.innerHTML = element.name
+      span.classList.add('list__user-span')
+      span.innerHTML = element.name
+      span.setAttribute('data-id', element.id)
+      user.append(span)
+      user.append(iconList)
       ul.append(user)
     }))
   app.append(ul)
@@ -136,13 +135,14 @@ const createElem = (data, inPoint) => {
 
   data.forEach(element => {
     let li = document.createElement('li')
+    let img = document.createElement('img')
     let starImg = document.createElement('img')
     starImg.classList.add('star-favorite')
     starImg.alt = 'star'
 
-    // Если событие на list__album
+    // Если событие на list__album-span
     if (element.thumbnailUrl) {
-
+      console.log(element.url)
       starImg.src = localStorage.getItem(`photo_${element.id}`)
         ?
         './img/star_active.png'
@@ -151,33 +151,99 @@ const createElem = (data, inPoint) => {
 
       ul.classList.remove('list')
       ul.classList.add('list-photo-wrapp')
-      let img = document.createElement('img')
       img.classList.add('photo')
       img.src = element.thumbnailUrl
       img.alt = element.title
       img.setAttribute('data-id', element.id)
+      img.setAttribute('data-url', element.url)
       li.classList.add('photo-wrapper')
       li.append(img)
       li.append(starImg)
       ul.append(li)
       inPoint.append(ul)
-    } else { // Если событие на list__user
+    } else { // Если событие на list__user-span
+      let iconList = document.createElement('img')
+      let span = document.createElement('span')
+      iconList.src = './img/open-list.svg'
+      iconList.classList.add('icon-list')
+
       li.setAttribute('data-id', element.id)
       li.classList.add('list__album')
-      li.innerHTML = element.title
+      span.classList.add('list__album-span')
+      span.innerHTML = element.title
+      span.setAttribute('data-id', element.id)
+      li.append(span)
+      li.append(iconList)
       ul.append(li)
       inPoint.append(ul)
     }
   })
 }
 
+// Создание спика Избранного
+const showInductee = () => {
+  let allStorage = getAllStorage()
+  let container = document.createElement('div')
+
+  app.innerHTML = ''
+
+  allStorage.forEach(arr => {
+
+    console.log(arr)
+    let divWrapp = document.createElement('div')
+    let img = document.createElement('img')
+    let starImg = document.createElement('img')
+    let description = document.createElement('p')
+    container.classList.add('inductee')
+    divWrapp.classList.add('inductee-wrapp')
+    img.classList.add('photo')
+    img.src = arr[0]
+    img.alt = arr[1]
+    img.setAttribute('data-id', `${arr[2]}`)
+    img.setAttribute('data-url', `${arr[3]}`)
+    starImg.classList.add('star-favorite')
+    starImg.alt = 'star'
+    starImg.src = './img/star_active.png'
+    description.classList.add('description')
+    description.innerHTML = `${arr[1]}`
+
+    divWrapp.append(starImg)
+    divWrapp.append(img)
+    divWrapp.append(description)
+    container.append(divWrapp)
+    app.append(container)
+  })
+}
+// Создание фото в полный экран
+const photoFullScreen = (element) => {
+  console.log(element)
+  document.body.style.overflow = 'hidden'
+  document.body.style.position = 'relative'
+  document.body.style.height = '100vh'
+  let backDiv = document.createElement('div')
+  let bigImg = document.createElement('img')
+  let closeImg = document.createElement('img')
+  backDiv.classList.add('overlay')
+  bigImg.classList.add('photo-fullscreen')
+  bigImg.src = element.getAttribute('data-url')
+  bigImg.alt = element.getAttribute('alt')
+  closeImg.src = './img/close_modal.svg'
+  closeImg.classList.add('close-modal')
+  modal.innerHTML = ''
+
+  modal.append(backDiv)
+  modal.append(bigImg)
+  modal.append(closeImg)
+  container.append(modal)
+}
+
 // Удаление елементов
 const clearElem = (element) => {
-  if (element.querySelector('.list-photo-wrapp')) {
+  if (element.querySelector('.list-photo-wrapp'))
     element.querySelector('.list-photo-wrapp').remove()
-  }
-  element.querySelectorAll('.list')
-    .forEach(elem => elem.remove())
+
+  if (element.querySelector('.list'))
+    element.querySelector('.list').remove()
 }
 
 
