@@ -18,11 +18,32 @@ app.addEventListener('click', event => {
   let elemClass = element.className
   let id = element.getAttribute('data-id')
 
+  if (element.className === 'icon-list') {
+    let user = element.parentElement.querySelector('.list__user-span')
+    let album = element.parentElement.querySelector('.list__album-span')
+    let photo = element.parentElement.querySelector('.list-photo-wrapp')
+    if (!album && user) {
+      getData(linkAlbum, id, user)
+      element.src = './img/close-list.svg'
+    }
 
+    if (album && !photo) {
+      getData(linkPhoto, id, album)
+      element.src = './img/close-list.svg'
+    }
+  }
   // Запрос для альбомов
-  if (elemClass === 'list__user-span' && !elemAlbum) getData(linkAlbum, id, element)
+  if (elemClass === 'list__user-span' && !elemAlbum) {
+    getData(linkAlbum, id, element)
+    let neighbor = element.parentElement.querySelector('.icon-list')
+    neighbor.src = './img/close-list.svg'
+  }
   // Запрос для фото
-  if (elemClass === 'list__album-span' && !elemPhoto) getData(linkPhoto, id, element)
+  if (elemClass === 'list__album-span' && !elemPhoto) {
+    getData(linkPhoto, id, element)
+    let neighbor = element.parentElement.querySelector('.icon-list')
+    neighbor.src = './img/close-list.svg'
+  }
   // Открытие фото в полный экран
   if (elemClass === 'photo') photoFullScreen(element)
   // Запись и уделание избранного в localstorage
@@ -47,11 +68,12 @@ app.addEventListener('click', event => {
   }
   // // Изменение иконки спика при открытие/закрытие
   // if (!element.querySelector('.list')) element.style.listStyleImage = 'url("../img/close-list.svg"'
-  // if (element.querySelector('.list')) element.style.listStyleImage = 'url("../img/open-list.svg"'
+  //  if (element.querySelector('.list')) element.parentElement.querySelector('.icon-list').src = './img/open-list.svg'
   // if (element.querySelector('.list-photo-wrapp')) element.style.listStyleImage = 'url("../img/open-list.svg"'
 
   // Удаление
-  clearElem(element)
+  if (element.className === 'icon-list') clearElem(element.parentElement)
+     else clearElem(element)
 })
 
 // Обработчик закрытия модального окна
@@ -108,6 +130,7 @@ const createUserList = () => {
 
       iconList.classList.add('icon-list')
       iconList.src = './img/open-list.svg'
+      iconList.setAttribute('data-id', element.id)
       user.setAttribute('data-id', element.id)
       user.classList.add('list__user')
       span.classList.add('list__user-span')
@@ -142,7 +165,6 @@ const createElem = (data, inPoint) => {
 
     // Если событие на list__album-span
     if (element.thumbnailUrl) {
-      console.log(element.url)
       starImg.src = localStorage.getItem(`photo_${element.id}`)
         ?
         './img/star_active.png'
@@ -166,6 +188,8 @@ const createElem = (data, inPoint) => {
       let span = document.createElement('span')
       iconList.src = './img/open-list.svg'
       iconList.classList.add('icon-list')
+      iconList.setAttribute('data-id', element.id)
+
 
       li.setAttribute('data-id', element.id)
       li.classList.add('list__album')
@@ -189,7 +213,6 @@ const showInductee = () => {
 
   allStorage.forEach(arr => {
 
-    console.log(arr)
     let divWrapp = document.createElement('div')
     let img = document.createElement('img')
     let starImg = document.createElement('img')
@@ -216,7 +239,6 @@ const showInductee = () => {
 }
 // Создание фото в полный экран
 const photoFullScreen = (element) => {
-  console.log(element)
   document.body.style.overflow = 'hidden'
   document.body.style.position = 'relative'
   document.body.style.height = '100vh'
@@ -239,14 +261,19 @@ const photoFullScreen = (element) => {
 
 // Удаление елементов
 const clearElem = (element) => {
-  if (element.querySelector('.list-photo-wrapp'))
+
+  if (element.querySelector('.list-photo-wrapp')) {
+    element.parentElement.querySelector('.icon-list')
+      .src = './img/open-list.svg'
     element.querySelector('.list-photo-wrapp').remove()
+  }
 
-  if (element.querySelector('.list'))
+  if (element.querySelector('.list')) {
     element.querySelector('.list').remove()
+    element.parentElement.querySelector('.icon-list')
+      .src = './img/open-list.svg'
+  }
 }
-
-
 
 
 
