@@ -70,7 +70,12 @@
 }
 .photo:hover {
   cursor: pointer;
+  content: attr(atl);
+  z-index: 1111;
 }
+/*.photo:hover::after {*/
+/*  */
+/*}*/
 .photo-fullscreen {
   position: fixed;
   left: 50%;

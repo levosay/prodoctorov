@@ -17,7 +17,7 @@ app.addEventListener('click', event => {
   let elemPhoto = element.querySelector('.photo-wrapper')
   let elemClass = element.className
   let id = element.getAttribute('data-id')
-
+  // Обработчик при нажаьте на иконку списка
   if (element.className === 'icon-list') {
     let user = element.parentElement.querySelector('.list__user-span')
     let album = element.parentElement.querySelector('.list__album-span')
@@ -66,10 +66,6 @@ app.addEventListener('click', event => {
       }
     }
   }
-  // // Изменение иконки спика при открытие/закрытие
-  // if (!element.querySelector('.list')) element.style.listStyleImage = 'url("../img/close-list.svg"'
-  //  if (element.querySelector('.list')) element.parentElement.querySelector('.icon-list').src = './img/open-list.svg'
-  // if (element.querySelector('.list-photo-wrapp')) element.style.listStyleImage = 'url("../img/open-list.svg"'
 
   // Удаление
   if (element.className === 'icon-list') clearElem(element.parentElement)
@@ -263,15 +259,16 @@ const photoFullScreen = (element) => {
 const clearElem = (element) => {
 
   if (element.querySelector('.list-photo-wrapp')) {
-    element.parentElement.querySelector('.icon-list')
+    element.querySelector('.icon-list')
       .src = './img/open-list.svg'
     element.querySelector('.list-photo-wrapp').remove()
   }
 
   if (element.querySelector('.list')) {
-    element.querySelector('.list').remove()
-    element.parentElement.querySelector('.icon-list')
+    element.querySelector('.icon-list')
       .src = './img/open-list.svg'
+    element.querySelector('.list').remove()
+
   }
 }
 
