@@ -33,7 +33,7 @@
 }
 .list__user {
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 .list__user-span {
   font-style: normal;
@@ -43,7 +43,8 @@
 }
 .list__album {
   position: relative;
-
+  margin-top: 25px;
+  margin-bottom: 25px;
 }
 .list__album-span {
   font-style: normal;
@@ -57,12 +58,31 @@
   grid-column-gap: 42px;
   grid-row-gap: 42px;
   width: max-content;
+  margin-top: 25px;
+  margin-bottom: 25px;
 }
 .photo-wrapper {
   position: relative;
   width: 150px;
   height: 150px;
   display: block;
+}
+.photo-wrapper:hover::after {
+  position: absolute;
+  top: 130px;
+  left: 40px;
+  width: 150px;
+  height: max-content;
+  padding: 8px;
+  content: attr(data-title);
+  background: rgba(0, 0, 0, 0.69);
+  border-radius: 4px;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 130%;
+  color: #FFF;
+  z-index: 4;
 }
 .photo {
   width: 100%;
@@ -119,9 +139,13 @@
   grid-template-columns: repeat(3, 1fr);
   grid-column-gap: 42px;
   grid-row-gap: 42px;
+  width: max-content;
+  margin: auto;
+
 }
 .inductee-wrapp {
   position: relative;
+  width: 150px;
 }
 .description {
   font-style: normal;
@@ -132,8 +156,8 @@
 }
 .icon-list {
   position: absolute;
-  top: 5px;
-  left: -29px;
+  top: 0;
+  left: -50px;
   width: 32px;
   height: 32px;
 }

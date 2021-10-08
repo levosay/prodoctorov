@@ -13,10 +13,16 @@ const linkPhoto = 'https://json.medrating.org/photos?albumId='
 app.addEventListener('click', event => {
   let element = event.target
   let parentElement = event.target.parentElement
+  let list = element.querySelector('.list')
+  let listParent = element.parentElement.querySelector('.list')
   let elemAlbum = element.querySelector('.list__album-span')
   let elemPhoto = element.querySelector('.photo-wrapper')
+  let photoWrapp = element.querySelector('.list-photo-wrapp')
+  let photoWrappParent = element.parentElement.querySelector('.list-photo-wrapp')
   let elemClass = element.className
   let id = element.getAttribute('data-id')
+  let neighbor = element.nextElementSibling
+
   // Обработчик при нажаьте на иконку списка
   if (element.className === 'icon-list') {
     let user = element.parentElement.querySelector('.list__user-span')
@@ -37,12 +43,15 @@ app.addEventListener('click', event => {
     getData(linkAlbum, id, element)
     let neighbor = element.parentElement.querySelector('.icon-list')
     neighbor.src = './img/close-list.svg'
+    console.log('+++++++')
   }
   // Запрос для фото
   if (elemClass === 'list__album-span' && !elemPhoto) {
     getData(linkPhoto, id, element)
     let neighbor = element.parentElement.querySelector('.icon-list')
     neighbor.src = './img/close-list.svg'
+    console.log('---------')
+
   }
   // Открытие фото в полный экран
   if (elemClass === 'photo') photoFullScreen(element)
@@ -66,10 +75,25 @@ app.addEventListener('click', event => {
       }
     }
   }
-
-  // Удаление
-  if (element.className === 'icon-list') clearElem(element.parentElement)
-     else clearElem(element)
+  // Удаление и смена иконки списка
+  if (element.className === 'icon-list' && listParent) {
+    console.log('=======')
+    element.src = './img/open-list.svg'
+    clearElem(element.parentElement)
+  }
+  if (element.className === 'icon-list' && photoWrappParent) {
+    console.log('=======')
+    element.src = './img/open-list.svg'
+    clearElem(element.parentElement)
+  }
+  if (element.className === 'list__user-span' && list) {
+    neighbor.src = './img/open-list.svg'
+    clearElem(element)
+  }
+  if (element.className === 'list__album-span' && photoWrapp) {
+    neighbor.src = './img/open-list.svg'
+    clearElem(element.parentElement)
+  }
 })
 
 // Обработчик закрытия модального окна
@@ -96,7 +120,6 @@ swap.addEventListener('click', event => {
   if (idBtn === 'inductee' && !inductee.classList.add('btn-active')) {
     inductee.classList.add('btn-active')
     catalog.classList.remove('btn-active')
-
     showInductee()
   }
 })
@@ -104,8 +127,8 @@ swap.addEventListener('click', event => {
 // Получение всех данных из localStorage
 const getAllStorage = () => {
   let values = [],
-      keys = Object.keys(localStorage),
-      i = keys.length;
+    keys = Object.keys(localStorage),
+    i = keys.length;
   while ( i-- ) {
     values.push( JSON.parse(localStorage.getItem(keys[i])) );
   }
@@ -122,7 +145,6 @@ const createUserList = () => {
       let iconList = document.createElement('img')
       let span = document.createElement('span')
       let user = document.createElement('li')
-
 
       iconList.classList.add('icon-list')
       iconList.src = './img/open-list.svg'
@@ -166,7 +188,6 @@ const createElem = (data, inPoint) => {
         './img/star_active.png'
         :
         './img/star_empty.png'
-
       ul.classList.remove('list')
       ul.classList.add('list-photo-wrapp')
       img.classList.add('photo')
@@ -174,6 +195,7 @@ const createElem = (data, inPoint) => {
       img.alt = element.title
       img.setAttribute('data-id', element.id)
       img.setAttribute('data-url', element.url)
+      li.setAttribute('data-title', element.title)
       li.classList.add('photo-wrapper')
       li.append(img)
       li.append(starImg)
@@ -185,8 +207,6 @@ const createElem = (data, inPoint) => {
       iconList.src = './img/open-list.svg'
       iconList.classList.add('icon-list')
       iconList.setAttribute('data-id', element.id)
-
-
       li.setAttribute('data-id', element.id)
       li.classList.add('list__album')
       span.classList.add('list__album-span')
@@ -259,16 +279,10 @@ const photoFullScreen = (element) => {
 const clearElem = (element) => {
 
   if (element.querySelector('.list-photo-wrapp')) {
-    element.querySelector('.icon-list')
-      .src = './img/open-list.svg'
     element.querySelector('.list-photo-wrapp').remove()
   }
-
   if (element.querySelector('.list')) {
-    element.querySelector('.icon-list')
-      .src = './img/open-list.svg'
     element.querySelector('.list').remove()
-
   }
 }
 
