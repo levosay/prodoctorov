@@ -7,7 +7,7 @@ const inductee = document.querySelector('#inductee')
 const photo = document.querySelector('.photo-wrapper')
 const linkUsers = 'https://json.medrating.org/users/'
 const linkAlbum = 'https://json.medrating.org/albums?userId='
-const linkPhoto = 'https://json.medrating.org/photos?albumId='
+const linkPhoto = 'https://json.medrating..org/photos?albumId='
 
 // Обработчик на создание/удаление списков
 app.addEventListener('click', event => {
@@ -22,41 +22,39 @@ app.addEventListener('click', event => {
   let elemClass = element.className
   let id = element.getAttribute('data-id')
   let neighbor = element.nextElementSibling
+  let loader = element.parentElement.querySelector('.loader-wrapp')
 
   // Обработчик при нажаьте на иконку списка
-  if (element.className === 'icon-list') {
+  if (element.className === 'icon-list' && !loader) {
     let user = element.parentElement.querySelector('.list__user-span')
     let album = element.parentElement.querySelector('.list__album-span')
     let photo = element.parentElement.querySelector('.list-photo-wrapp')
-    if (!album && user) {
+    if (!album && user && !loader) {
       getData(linkAlbum, id, user)
       element.src = './img/close-list.svg'
     }
 
-    if (album && !photo) {
+    if (album && !photo && !loader) {
       getData(linkPhoto, id, album)
       element.src = './img/close-list.svg'
     }
   }
   // Запрос для альбомов
-  if (elemClass === 'list__user-span' && !elemAlbum) {
+  if (elemClass === 'list__user-span' && !elemAlbum && !loader) {
     getData(linkAlbum, id, element)
     let neighbor = element.parentElement.querySelector('.icon-list')
     neighbor.src = './img/close-list.svg'
-    console.log('+++++++')
   }
   // Запрос для фото
-  if (elemClass === 'list__album-span' && !elemPhoto) {
+  if (elemClass === 'list__album-span' && !elemPhoto && !loader) {
     getData(linkPhoto, id, element)
     let neighbor = element.parentElement.querySelector('.icon-list')
     neighbor.src = './img/close-list.svg'
-    console.log('---------')
-
   }
   // Открытие фото в полный экран
   if (elemClass === 'photo') photoFullScreen(element)
   // Запись и уделание избранного в localstorage
-  if (elemClass === 'star-favorite') {
+  if (elemClass === 'star-favorite' && !loader) {
     let photo = parentElement.querySelector('.photo')
     let id = photo.getAttribute('data-id')
     let url = photo.getAttribute('src')
@@ -70,19 +68,16 @@ app.addEventListener('click', event => {
     } else {
       localStorage.removeItem(`photo_${id}`)
       event.target.setAttribute('src', './img/star_empty.png')
-      if (event.target.parentElement.className === 'inductee-wrapp') {
-        event.target.parentElement.remove()
-      }
+      if (event.target.parentElement.className === 'inductee-wrapp')
+        showInductee()
     }
   }
   // Удаление и смена иконки списка
   if (element.className === 'icon-list' && listParent) {
-    console.log('=======')
     element.src = './img/open-list.svg'
     clearElem(element.parentElement)
   }
   if (element.className === 'icon-list' && photoWrappParent) {
-    console.log('=======')
     element.src = './img/open-list.svg'
     clearElem(element.parentElement)
   }
@@ -94,6 +89,11 @@ app.addEventListener('click', event => {
     neighbor.src = './img/open-list.svg'
     clearElem(element.parentElement)
   }
+  if (loader) {
+    element.parentElement.querySelector('.icon-list').src = './img/open-list.svg'
+    clearElem(element)
+  }
+
 })
 
 // Обработчик закрытия модального окна
@@ -110,14 +110,14 @@ modal.addEventListener('click', event => {
 swap.addEventListener('click', event => {
   let idBtn = event.target.getAttribute('id')
 
-  if (idBtn === 'catalog' && !catalog.classList.add('btn-active')) {
+  if (idBtn === 'catalog') {
     catalog.classList.add('btn-active')
     inductee.classList.remove('btn-active')
     app.innerHTML = ''
     createUserList()
   }
 
-  if (idBtn === 'inductee' && !inductee.classList.add('btn-active')) {
+  if (idBtn === 'inductee') {
     inductee.classList.add('btn-active')
     catalog.classList.remove('btn-active')
     showInductee()
@@ -157,7 +157,10 @@ const createUserList = () => {
       user.append(span)
       user.append(iconList)
       ul.append(user)
-    }))
+    })).catch(err => { // Если данные не пришли
+    //console.log(err)
+    showLoader()
+  })
   app.append(ul)
 }
 createUserList()
@@ -167,6 +170,10 @@ const getData = (url, id, inPoint) => {
   fetch(`${url}${id}`)
     .then((response) => response.json())
     .then((data) => createElem(data, inPoint))
+    .catch(err => { // Если данные не пришли
+      //console.log(err)
+      showLoader(inPoint)
+    })
 }
 
 // Создание елементов и вставка их по inPoint
@@ -220,38 +227,59 @@ const createElem = (data, inPoint) => {
   })
 }
 
-// Создание спика Избранного
+// Создание списка Избранного
 const showInductee = () => {
   let allStorage = getAllStorage()
-  let container = document.createElement('div')
 
-  app.innerHTML = ''
+  if (allStorage.length > 0) {
+    let container = document.createElement('div')
+    app.innerHTML = ''
 
-  allStorage.forEach(arr => {
+    allStorage.forEach(arr => {
 
-    let divWrapp = document.createElement('div')
-    let img = document.createElement('img')
-    let starImg = document.createElement('img')
-    let description = document.createElement('p')
-    container.classList.add('inductee')
-    divWrapp.classList.add('inductee-wrapp')
-    img.classList.add('photo')
-    img.src = arr[0]
-    img.alt = arr[1]
-    img.setAttribute('data-id', `${arr[2]}`)
-    img.setAttribute('data-url', `${arr[3]}`)
-    starImg.classList.add('star-favorite')
-    starImg.alt = 'star'
-    starImg.src = './img/star_active.png'
-    description.classList.add('description')
-    description.innerHTML = `${arr[1]}`
+      let divWrapp = document.createElement('div')
+      let img = document.createElement('img')
+      let starImg = document.createElement('img')
+      let description = document.createElement('p')
+      container.classList.add('inductee')
+      divWrapp.classList.add('inductee-wrapp')
+      img.classList.add('photo')
+      img.src = arr[0]
+      img.alt = arr[1]
+      img.setAttribute('data-id', `${arr[2]}`)
+      img.setAttribute('data-url', `${arr[3]}`)
+      starImg.classList.add('star-favorite')
+      starImg.alt = 'star'
+      starImg.src = './img/star_active.png'
+      description.classList.add('description')
+      description.innerHTML = `${arr[1]}`
 
-    divWrapp.append(starImg)
-    divWrapp.append(img)
-    divWrapp.append(description)
-    container.append(divWrapp)
-    app.append(container)
-  })
+      divWrapp.append(starImg)
+      divWrapp.append(img)
+      divWrapp.append(description)
+      container.append(divWrapp)
+      app.append(container)
+    })
+  } else {
+    let divEmpty = document.createElement('div')
+    let imgListEmpty = document.createElement('img')
+    let titleEmpty = document.createElement('h3')
+    let textEmpty = document.createElement('p')
+    divEmpty.classList.add('empty')
+    imgListEmpty.classList.add('empty__img')
+    imgListEmpty.alt = 'Список Избранного пуст'
+    imgListEmpty.src = './img/empty.png'
+    titleEmpty.classList.add('empty__title')
+    titleEmpty.innerHTML = 'Список избранного пуст'
+    textEmpty.classList.add('empty__text')
+    textEmpty.innerHTML = 'Добавляйте изображения, нажимая на звездочки'
+    app.innerHTML = ''
+
+    divEmpty.append(imgListEmpty)
+    divEmpty.append(titleEmpty)
+    divEmpty.append(textEmpty)
+    app.append(divEmpty)
+  }
 }
 // Создание фото в полный экран
 const photoFullScreen = (element) => {
@@ -274,10 +302,29 @@ const photoFullScreen = (element) => {
   modal.append(closeImg)
   container.append(modal)
 }
-
+// Создание лоадера
+const showLoader = (inPoint = app) => {
+  let imgLoader = document.createElement('img')
+  let ulLoader = document.createElement('ul')
+  imgLoader.classList.add('loader')
+  imgLoader.src = './img/loader.gif'
+  ulLoader.classList.add('loader-wrapp')
+  ulLoader.append(imgLoader)
+  inPoint.append(ulLoader)
+}
 // Удаление елементов
 const clearElem = (element) => {
+  let loader = element.parentElement.querySelector('.loader-wrapp')
 
+  if (element.className === 'icon-list') {
+    element.parentElement.querySelector('.loader-wrapp').remove()
+  }
+  if (element.className === 'list__album-span' && loader) {
+    element.querySelector('.loader-wrapp').remove()
+  }
+  if (element.className === 'list__user-span' && loader) {
+    element.querySelector('.loader-wrapp').remove()
+  }
   if (element.querySelector('.list-photo-wrapp')) {
     element.querySelector('.list-photo-wrapp').remove()
   }
