@@ -6,8 +6,8 @@ const catalog = document.querySelector('#catalog')
 const inductee = document.querySelector('#inductee')
 const photo = document.querySelector('.photo-wrapper')
 const linkUsers = 'https://json.medrating.org/users/'
-const linkAlbum = 'https://json.medrating..org/albums?userId='
-const linkPhoto = 'https://json.medrating.org/photos?albumId='
+const linkAlbum = 'https://json.medrating.org/albums?userId='
+const linkPhoto = 'https://json.medrating..org/photos?albumId='
 
 // Обработчик на создание/удаление списков
 app.addEventListener('click', event => {
@@ -22,18 +22,18 @@ app.addEventListener('click', event => {
   let elemClass = element.className
   let id = element.getAttribute('data-id')
   let neighbor = element.nextElementSibling
-  let errorImg = element.parentElement.querySelector('.error__img-user-wrapp')
+  let errorImg = element.parentElement.querySelector('.error__img-wrapp')
 
   // Обработчик при нажаьте на иконку списка
   if (element.className === 'icon-list' && !errorImg) {
     let user = element.parentElement.querySelector('.list__user-span')
     let album = element.parentElement.querySelector('.list__album-span')
     let photo = element.parentElement.querySelector('.list-photo-wrapp')
+
     if (!album && user && !errorImg) {
       getData(linkAlbum, id, user)
       element.src = './img/close-list.svg'
     }
-
     if (album && !photo && !errorImg) {
       getData(linkPhoto, id, album)
       element.src = './img/close-list.svg'
@@ -114,7 +114,7 @@ swap.addEventListener('click', event => {
     catalog.classList.add('btn-active')
     inductee.classList.remove('btn-active')
     app.innerHTML = ''
-    createUserList()
+    getUserList()
   }
 
   if (idBtn === 'inductee') {
@@ -134,13 +134,34 @@ const getAllStorage = () => {
   }
   return values;
 }
+// Создание лоадера
+const showLoader = (inPoint = app) => {
+  let imgLoader = document.createElement('img')
+  let ulLoader = document.createElement('ul')
+  imgLoader.classList.add('loader')
+  imgLoader.src = './img/loader.gif'
+  ulLoader.classList.add('loader-wrapp')
+  ulLoader.append(imgLoader)
+  inPoint.append(ulLoader)
+}
 
-//Создание списка пользователей
-const createUserList = () => {
+// Функция задержки
+const delay = ms => {
+  return new Promise(r => setTimeout(() => r(), ms))
+}
+// Первоначальная отрисовка списка пользователей с задержкой
+const getUserList = () => {
   let ul = document.createElement('ul')
   ul.classList.add('container', 'list')
-  fetch(linkUsers)
-    .then((response) => response.json())
+
+  showLoader()
+  return delay(500)
+    .then(() => {
+      app.querySelector('.loader').remove()
+
+      return fetch(linkUsers)
+    })
+    .then(response => response.json())
     .then((data) => data.forEach( element => {
       let iconList = document.createElement('img')
       let span = document.createElement('span')
@@ -157,22 +178,31 @@ const createUserList = () => {
       user.append(span)
       user.append(iconList)
       ul.append(user)
-    })).catch(err => { // Если данные не пришли
-    //console.log(err)
-    showErrorImg(app, 'error__img-wrapp')
-  })
-  app.append(ul)
+      app.append(ul)
+      })
+    ).catch(err => { // Если данные не пришли
+      console.log(err)
+      showErrorImg(app, 'error__img-user-wrapp')
+    })
 }
-createUserList()
 
-// Получение данных по ссылке и отправка их на создание разметки
+getUserList()
+
+// Получение данных по ссылке и отправка их на создание разметки,
+// отображение ловдера во время задержки
 const getData = (url, id, inPoint) => {
-  fetch(`${url}${id}`)
-    .then((response) => response.json())
+  showLoader(inPoint)
+
+  return delay(500)
+    .then(() => {
+      app.querySelector('.loader').remove()
+      return fetch(`${url}${id}`)
+    })
+    .then(response => response.json())
     .then((data) => createElem(data, inPoint))
     .catch(err => { // Если данные не пришли
-      //console.log(err)
-      showErrorImg(inPoint, 'error__img-user-wrapp')
+      console.log(err)
+      showErrorImg(inPoint, 'error__img-wrapp')
     })
 }
 
@@ -302,35 +332,35 @@ const photoFullScreen = (element) => {
   modal.append(closeImg)
   container.append(modal)
 }
-// Создание лоадера
-const showErrorImg = (inPoint = app, className) => {
+// Создание errorImg
+const showErrorImg = (inPoint, className) => {
   let divText = document.createElement('div')
-  let imgLoader = document.createElement('img')
-  let ulLoader = document.createElement('ul')
+  let imgError = document.createElement('img')
+  let ulError = document.createElement('ul')
   let titleError = document.createElement('h3')
   let textError = document.createElement('p')
-  imgLoader.classList.add('error__img')
-  imgLoader.src = './img/error.png'
-  ulLoader.classList.add(className)
+
+  imgError.classList.add('error__img')
+  imgError.src = './img/error.png'
+  ulError.classList.add(className)
   divText.classList.add('error__text-wrapp')
   titleError.classList.add('error__title')
   titleError.innerHTML = 'Сервер не отвечает'
-  textError.classList.add('empty__text')
+  textError.classList.add('error__text')
   textError.innerHTML = 'Уже работаем над этим'
+
   divText.append(titleError)
   divText.append(textError)
-  ulLoader.append(imgLoader)
-  ulLoader.append(divText)
-
-  inPoint.append(ulLoader)
+  ulError.append(imgError)
+  ulError.append(divText)
+  inPoint.append(ulError)
 }
 // Удаление елементов
 const clearElem = (element) => {
-  let errorAll = element.parentElement.querySelector('.error__img-user-wrapp')
+  let errorAll = element.parentElement.querySelector('.error__img-wrapp')
   let errorUser = element.parentElement.querySelector('.error__img-user-wrapp')
+  let loader = element.parentElement.querySelector('.loader-wrapp')
 
-  console.log(errorAll)
-  console.log(errorUser)
   if (element.className === 'icon-list') {
     errorAll.remove()
     errorUser.remove()
@@ -342,6 +372,9 @@ const clearElem = (element) => {
   if (element.className === 'list__user-span' && (errorAll || errorUser)) {
     errorAll.remove()
     errorUser.remove()
+  }
+  if (element.className === 'list__album-span' && loader) {
+    element.querySelector('.loader-wrapp').remove()
   }
   if (element.querySelector('.list-photo-wrapp')) {
     element.querySelector('.list-photo-wrapp').remove()
