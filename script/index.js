@@ -266,11 +266,11 @@ const showInductee = () => {
     app.innerHTML = ''
 
     allStorage.forEach(arr => {
-
       let divWrapp = document.createElement('div')
       let img = document.createElement('img')
       let starImg = document.createElement('img')
       let description = document.createElement('p')
+
       container.classList.add('inductee')
       divWrapp.classList.add('inductee-wrapp')
       img.classList.add('photo')
@@ -295,6 +295,7 @@ const showInductee = () => {
     let imgListEmpty = document.createElement('img')
     let titleEmpty = document.createElement('h3')
     let textEmpty = document.createElement('p')
+
     divEmpty.classList.add('empty')
     imgListEmpty.classList.add('empty__img')
     imgListEmpty.alt = 'Список Избранного пуст'
@@ -319,6 +320,7 @@ const photoFullScreen = (element) => {
   let backDiv = document.createElement('div')
   let bigImg = document.createElement('img')
   let closeImg = document.createElement('img')
+
   backDiv.classList.add('overlay')
   bigImg.classList.add('photo-fullscreen')
   bigImg.src = element.getAttribute('data-url')
