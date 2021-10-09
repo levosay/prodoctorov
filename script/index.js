@@ -6,8 +6,8 @@ const catalog = document.querySelector('#catalog')
 const inductee = document.querySelector('#inductee')
 const photo = document.querySelector('.photo-wrapper')
 const linkUsers = 'https://json.medrating.org/users/'
-const linkAlbum = 'https://json.medrating.org/albums?userId='
-const linkPhoto = 'https://json.medrating..org/photos?albumId='
+const linkAlbum = 'https://json.medrating..org/albums?userId='
+const linkPhoto = 'https://json.medrating.org/photos?albumId='
 
 // Обработчик на создание/удаление списков
 app.addEventListener('click', event => {
@@ -22,31 +22,31 @@ app.addEventListener('click', event => {
   let elemClass = element.className
   let id = element.getAttribute('data-id')
   let neighbor = element.nextElementSibling
-  let loader = element.parentElement.querySelector('.loader-wrapp')
+  let errorImg = element.parentElement.querySelector('.error__img-user-wrapp')
 
   // Обработчик при нажаьте на иконку списка
-  if (element.className === 'icon-list' && !loader) {
+  if (element.className === 'icon-list' && !errorImg) {
     let user = element.parentElement.querySelector('.list__user-span')
     let album = element.parentElement.querySelector('.list__album-span')
     let photo = element.parentElement.querySelector('.list-photo-wrapp')
-    if (!album && user && !loader) {
+    if (!album && user && !errorImg) {
       getData(linkAlbum, id, user)
       element.src = './img/close-list.svg'
     }
 
-    if (album && !photo && !loader) {
+    if (album && !photo && !errorImg) {
       getData(linkPhoto, id, album)
       element.src = './img/close-list.svg'
     }
   }
   // Запрос для альбомов
-  if (elemClass === 'list__user-span' && !elemAlbum && !loader) {
+  if (elemClass === 'list__user-span' && !elemAlbum && !errorImg) {
     getData(linkAlbum, id, element)
     let neighbor = element.parentElement.querySelector('.icon-list')
     neighbor.src = './img/close-list.svg'
   }
   // Запрос для фото
-  if (elemClass === 'list__album-span' && !elemPhoto && !loader) {
+  if (elemClass === 'list__album-span' && !elemPhoto && !errorImg) {
     getData(linkPhoto, id, element)
     let neighbor = element.parentElement.querySelector('.icon-list')
     neighbor.src = './img/close-list.svg'
@@ -54,7 +54,7 @@ app.addEventListener('click', event => {
   // Открытие фото в полный экран
   if (elemClass === 'photo') photoFullScreen(element)
   // Запись и уделание избранного в localstorage
-  if (elemClass === 'star-favorite' && !loader) {
+  if (elemClass === 'star-favorite' && !errorImg) {
     let photo = parentElement.querySelector('.photo')
     let id = photo.getAttribute('data-id')
     let url = photo.getAttribute('src')
@@ -89,7 +89,7 @@ app.addEventListener('click', event => {
     neighbor.src = './img/open-list.svg'
     clearElem(element.parentElement)
   }
-  if (loader) {
+  if (errorImg) {
     element.parentElement.querySelector('.icon-list').src = './img/open-list.svg'
     clearElem(element)
   }
@@ -159,7 +159,7 @@ const createUserList = () => {
       ul.append(user)
     })).catch(err => { // Если данные не пришли
     //console.log(err)
-    showLoader()
+    showErrorImg(app, 'error__img-wrapp')
   })
   app.append(ul)
 }
@@ -172,7 +172,7 @@ const getData = (url, id, inPoint) => {
     .then((data) => createElem(data, inPoint))
     .catch(err => { // Если данные не пришли
       //console.log(err)
-      showLoader(inPoint)
+      showErrorImg(inPoint, 'error__img-user-wrapp')
     })
 }
 
@@ -303,27 +303,45 @@ const photoFullScreen = (element) => {
   container.append(modal)
 }
 // Создание лоадера
-const showLoader = (inPoint = app) => {
+const showErrorImg = (inPoint = app, className) => {
+  let divText = document.createElement('div')
   let imgLoader = document.createElement('img')
   let ulLoader = document.createElement('ul')
-  imgLoader.classList.add('loader')
-  imgLoader.src = './img/loader.gif'
-  ulLoader.classList.add('loader-wrapp')
+  let titleError = document.createElement('h3')
+  let textError = document.createElement('p')
+  imgLoader.classList.add('error__img')
+  imgLoader.src = './img/error.png'
+  ulLoader.classList.add(className)
+  divText.classList.add('error__text-wrapp')
+  titleError.classList.add('error__title')
+  titleError.innerHTML = 'Сервер не отвечает'
+  textError.classList.add('empty__text')
+  textError.innerHTML = 'Уже работаем над этим'
+  divText.append(titleError)
+  divText.append(textError)
   ulLoader.append(imgLoader)
+  ulLoader.append(divText)
+
   inPoint.append(ulLoader)
 }
 // Удаление елементов
 const clearElem = (element) => {
-  let loader = element.parentElement.querySelector('.loader-wrapp')
+  let errorAll = element.parentElement.querySelector('.error__img-user-wrapp')
+  let errorUser = element.parentElement.querySelector('.error__img-user-wrapp')
 
+  console.log(errorAll)
+  console.log(errorUser)
   if (element.className === 'icon-list') {
-    element.parentElement.querySelector('.loader-wrapp').remove()
+    errorAll.remove()
+    errorUser.remove()
   }
-  if (element.className === 'list__album-span' && loader) {
-    element.querySelector('.loader-wrapp').remove()
+  if (element.className === 'list__album-span' && (errorAll || errorUser)) {
+    errorAll.remove()
+    errorUser.remove()
   }
-  if (element.className === 'list__user-span' && loader) {
-    element.querySelector('.loader-wrapp').remove()
+  if (element.className === 'list__user-span' && (errorAll || errorUser)) {
+    errorAll.remove()
+    errorUser.remove()
   }
   if (element.querySelector('.list-photo-wrapp')) {
     element.querySelector('.list-photo-wrapp').remove()
