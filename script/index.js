@@ -7,7 +7,7 @@ const inductee = document.querySelector('#inductee')
 const photo = document.querySelector('.photo-wrapper')
 const linkUsers = 'https://json.medrating.org/users/'
 const linkAlbum = 'https://json.medrating.org/albums?userId='
-const linkPhoto = 'https://json.medrating..org/photos?albumId='
+const linkPhoto = 'https://json.medrating.org/photos?albumId='
 
 // Обработчик на создание/удаление списков
 app.addEventListener('click', event => {
